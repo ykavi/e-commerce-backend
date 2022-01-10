@@ -1,19 +1,19 @@
 const { MongoClient } = require('mongodb');
 const logger = require('../logger/api.logger');
-
+var con;
 const connect = async () => {
   const uri = process.env.MONGO_CONNECTION_STRING;
   const client = new MongoClient(uri);
   logger.info('process.env.MONGO_CONNECTION_STRING :::' + process.env.MONGO_CONNECTION_STRING);
 
   try {
-    await client.connect();
-    await listDatabases(client);
+    con = await client.connect();
   } catch (e) {
     logger.error(e);
   } finally {
     await client.close();
   }
+  return false;
 };
 
 const listDatabases = async (client) => {
@@ -22,5 +22,5 @@ const listDatabases = async (client) => {
 };
 
 module.exports = {
-  connect,
+  con,
 };
