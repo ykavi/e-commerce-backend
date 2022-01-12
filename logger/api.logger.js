@@ -3,12 +3,8 @@ const pine = require('pine');
 const logger = pine();
 
 class APILogger {
-  info(message) {
-    logger.info(message);
-  }
-
   info(message, data) {
-    logger.info(`${message}   ${undefined !== data ? JSON.stringify(data) : ''}`);
+    data ? logger.info(`${message}   ${data ? JSON.stringify(data) : ''}`) : logger.info(message);
   }
 
   error(message) {
