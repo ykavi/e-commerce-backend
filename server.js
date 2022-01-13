@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const logger = require('./logger/api.logger');
 const { DB_NAME, COLLECTION } = require('./config/db-config');
+const { userSchema } = require('./db-schemas/user-schema');
 const { MongoClient } = require('mongodb');
 
 const app = express();
@@ -45,4 +46,16 @@ app.delete('/api/task/:id', (req, res) => {
 
 app.get('/', (req, res) => {
   res.send(`<h1>API Works !!!</h1>`);
+});
+
+app.post('/create-collection', (req, res) => {
+  db.createCollection('test99122', userSchema, (error, result) => {
+    if (error) {
+      res.send(error);
+      logger.error(error);
+    }
+
+    logger.info('createCollection', result?.s?.namespace);
+    res.json(result?.s?.namespace);
+  });
 });
