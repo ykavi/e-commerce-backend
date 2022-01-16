@@ -48,8 +48,32 @@ app.get('/', (req, res) => {
   res.send(`<h1>API Works !!!</h1>`);
 });
 
-app.post('/create-collection', (req, res) => {
-  db.createCollection('test99122', userSchema, (error, result) => {
+app.post('/create-products', (req, res) => {
+  db.createCollection('products', (error, result) => {
+    if (error) {
+      res.send(error);
+      logger.error(error);
+    }
+
+    logger.info('createCollection', result?.s?.namespace);
+    res.json(result?.s?.namespace);
+  });
+});
+
+app.post('/create-coupons', (req, res) => {
+  db.createCollection('coupons', (error, result) => {
+    if (error) {
+      res.send(error);
+      logger.error(error);
+    }
+
+    logger.info('createCollection', result?.s?.namespace);
+    res.json(result?.s?.namespace);
+  });
+});
+
+app.post('/create-orders', (req, res) => {
+  db.createCollection('orders', (error, result) => {
     if (error) {
       res.send(error);
       logger.error(error);
