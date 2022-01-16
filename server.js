@@ -2,8 +2,9 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const logger = require('./logger/api.logger');
 const { DB_NAME, COLLECTION } = require('./config/db-config');
-const { userSchema } = require('./db-schemas/user-schema');
 const { MongoClient } = require('mongodb');
+const { userSchema } = require('./db-schemas/user-schema');
+const { productMapper } = require('./utils/mapper');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -20,7 +21,7 @@ MongoClient.connect(process.env.MONGO_CONNECTION_STRING, (err, database) => {
   });
 });
 
-app.get('/api/tasks', (req, res) => {
+app.get('/products', (req, res) => {
   db.collection(COLLECTION)
     .find({})
     .limit(50)
@@ -31,9 +32,19 @@ app.get('/api/tasks', (req, res) => {
     });
 });
 
-app.post('/api/task', (req, res) => {
-  console.log(req.body, 'dd');
-  taskController.createTask(req.body.task).then((data) => res.json(data));
+app.post('/product', (req, res) => {
+  const mappedProduct = productMapper(req.body);
+  if (!mappedProduct) {
+    res.send('mappedProduct: error');
+  } else {
+    db.collection(COLLECTION.PRODUCT).insertOne(mappedProduct, (error, response) => {
+      if (error) {
+        res.send(false);
+        return false;
+      }
+      res.json(response);
+    });
+  }
 });
 
 app.put('/api/task', (req, res) => {
