@@ -55,7 +55,7 @@ app.post('/create-products', (req, res) => {
       logger.error(error);
     }
 
-    logger.info('createCollection', result?.s?.namespace);
+    logger.info('createdCollection', result?.s?.namespace);
     res.json(result?.s?.namespace);
   });
 });
@@ -67,7 +67,7 @@ app.post('/create-coupons', (req, res) => {
       logger.error(error);
     }
 
-    logger.info('createCollection', result?.s?.namespace);
+    logger.info('createdCoupons', result?.s?.namespace);
     res.json(result?.s?.namespace);
   });
 });
@@ -79,7 +79,7 @@ app.post('/create-orders', (req, res) => {
       logger.error(error);
     }
 
-    logger.info('createCollection', result?.s?.namespace);
+    logger.info('createdOrders', result?.s?.namespace);
     res.json(result?.s?.namespace);
   });
 });
