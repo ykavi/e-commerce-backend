@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const logger = require('./logger/api.logger');
 const { DB_NAME, COLLECTION } = require('./config/db-config');
 const { MongoClient } = require('mongodb');
-const { userSchema } = require('./db-schemas/user-schema');
+const { productSchema } = require('./db-schemas/product-schema');
 const { productMapper } = require('./utils/mapper');
 
 const app = express();
@@ -22,7 +22,7 @@ MongoClient.connect(process.env.MONGO_CONNECTION_STRING, (err, database) => {
 });
 
 app.get('/products', (req, res) => {
-  db.collection(COLLECTION)
+  db.collection(COLLECTION.PRODUCT)
     .find({})
     .limit(50)
     .toArray((err, result) => {
@@ -35,14 +35,14 @@ app.get('/products', (req, res) => {
 app.post('/product', (req, res) => {
   const mappedProduct = productMapper(req.body);
   if (!mappedProduct) {
-    res.send('mappedProduct: error');
+    res.send(false);
   } else {
     db.collection(COLLECTION.PRODUCT).insertOne(mappedProduct, (error, response) => {
       if (error) {
         res.send(false);
         return false;
       }
-      res.json(response);
+      res.json(response?.insertedId);
     });
   }
 });
@@ -60,7 +60,7 @@ app.get('/', (req, res) => {
 });
 
 app.post('/create-products', (req, res) => {
-  db.createCollection('products', (error, result) => {
+  db.createCollection(COLLECTION.PRODUCT, productSchema, (error, result) => {
     if (error) {
       res.send(error);
       logger.error(error);
@@ -72,7 +72,7 @@ app.post('/create-products', (req, res) => {
 });
 
 app.post('/create-coupons', (req, res) => {
-  db.createCollection('coupons', (error, result) => {
+  db.createCollection(COLLECTION.COUPONS, (error, result) => {
     if (error) {
       res.send(error);
       logger.error(error);
@@ -84,7 +84,7 @@ app.post('/create-coupons', (req, res) => {
 });
 
 app.post('/create-orders', (req, res) => {
-  db.createCollection('orders', (error, result) => {
+  db.createCollection(COLLECTION.ORDERS, (error, result) => {
     if (error) {
       res.send(error);
       logger.error(error);

@@ -1,7 +1,9 @@
 const DB_CONFIG = {
-  DB_NAME: 'task',
+  DB_NAME: 'TASK',
   COLLECTION: {
     PRODUCT: 'PRODUCT',
+    COUPONS: 'COUPONS',
+    ORDERS: 'ORDERS',
   },
 };
 
