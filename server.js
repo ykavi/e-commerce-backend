@@ -1,26 +1,67 @@
 const express = require('express');
-const bodyParser = require('body-parser');
+const { MongoClient, ObjectId } = require('mongodb');
+const { ApolloServer, gql } = require('apollo-server');
+
 const logger = require('./logger/api.logger');
 const { DB_NAME, COLLECTION } = require('./config/db-config');
-const { MongoClient } = require('mongodb');
 const { productSchema } = require('./db-schemas/product-schema');
 const { productMapper } = require('./utils/mapper');
 
-const app = express();
+const typeDefs = gql`
+  type Query {
+    Products(ids: [String]): [Products]
+  }
+  type Products {
+    _id: String!
+    title: String
+    price: Int!
+    discountedPrice: Int
+    hasDiscount: Boolean!
+    images: [String]
+    stock: Int
+    description: String
+    categoryCode: String
+    currency: String
+    values: [String]
+    cargoDetail: CargoDetail
+  }
+  type CargoDetail {
+    free: Boolean
+    price: Int
+  }
+`;
+
+const resolvers = {
+  Query: {
+    Products: async (parent, args, context, info) => {
+      return await db
+        .collection(COLLECTION.PRODUCT)
+        .find(args.ids.length > 0 && { _id: { $in: [...args.ids.map((id) => ObjectId(id))] } })
+        .limit(50)
+        .toArray()
+        .then((res) => {
+          return res;
+        });
+    },
+  },
+};
+
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+});
 const port = process.env.PORT || 3000;
 
 require('dotenv').config();
-app.use(bodyParser.json());
 let db;
 
 MongoClient.connect(process.env.MONGO_CONNECTION_STRING, (err, database) => {
   if (err) throw err;
-  db = database.db(DB_NAME);
-  app.listen(port, () => {
-    logger.info(`Node.js app is listening at http://localhost:${port}`);
-  });
+  db = database.db(DB_NAME); // DB connection apollo server context parametresinde yapılacak.
+  server.listen(port).then(({ url }) => logger.info(`Server running at ${url} `));
 });
 
+/*
 app.get('/products', (req, res) => {
   db.collection(COLLECTION.PRODUCT)
     .find({})
@@ -94,3 +135,4 @@ app.post('/create-orders', (req, res) => {
     res.json(result?.s?.namespace);
   });
 });
+*/
