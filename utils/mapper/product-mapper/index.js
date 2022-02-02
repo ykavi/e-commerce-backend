@@ -15,7 +15,7 @@ const productMapper = (product) => {
       values: product?.values || [],
       cargoDetail: {
         free: product?.cargoDetail?.free,
-        price: product?.cargoDetail?.price,
+        price: product?.cargoDetail?.price || -1,
       },
     };
   } catch (e) {

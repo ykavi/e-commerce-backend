@@ -11,6 +11,29 @@ const typeDefs = gql`
   type Query {
     Products(ids: [String]): [Products]
   }
+
+  type Mutation {
+    AddProduct(inputProduct: ProductInput): Products
+  }
+
+  input ProductInput {
+    title: String
+    price: Int!
+    discountedPrice: Int
+    hasDiscount: Boolean!
+    images: [String]
+    stock: Int
+    description: String
+    categoryCode: String
+    currency: String
+    values: [String]
+    cargoDetail: CargoDetailInput
+  }
+  input CargoDetailInput {
+    free: Boolean
+    price: Int
+  }
+
   type Products {
     _id: String!
     title: String
@@ -39,9 +62,22 @@ const resolvers = {
         .find(args.ids.length > 0 && { _id: { $in: [...args.ids.map((id) => ObjectId(id))] } })
         .limit(50)
         .toArray()
-        .then((res) => {
-          return res;
-        });
+        .then((res) => res)
+        .catch((err) => logger.error(err));
+    },
+  },
+  Mutation: {
+    AddProduct: async (parent, { inputProduct }, context, info) => {
+      const mappedProduct = productMapper(inputProduct);
+      if (!mappedProduct) logger.error('mappedProduct error!');
+
+      const result = await db
+        .collection(COLLECTION.PRODUCT)
+        .insertOne(mappedProduct)
+        .then((res) => res)
+        .catch((err) => logger.error(err));
+
+      return result?.insertedId && { ...mappedProduct, _id: result?.insertedId };
     },
   },
 };
