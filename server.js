@@ -14,6 +14,7 @@ const typeDefs = gql`
 
   type Mutation {
     AddProduct(inputProduct: ProductInput): Products
+    UpdateProduct(_id: String!, inputProduct: ProductInput): Products
   }
 
   input ProductInput {
@@ -74,6 +75,24 @@ const resolvers = {
       const result = await db
         .collection(COLLECTION.PRODUCT)
         .insertOne(mappedProduct)
+        .then((res) => res)
+        .catch((err) => logger.error(err));
+
+      return result?.insertedId && { ...mappedProduct, _id: result?.insertedId };
+    },
+
+    UpdateProduct: async (parent, { inputProduct }, context, info) => {
+      if (!inputProduct?._id)
+        return {
+          success: false,
+          message: 'failed to cancel trip',
+        };
+      const mappedProduct = productMapper(inputProduct);
+      if (!mappedProduct) logger.error('mappedProduct error!');
+
+      const result = await db
+        .collection(COLLECTION.PRODUCT)
+        .updateOne({ _id: 'Central Perk Cafe' }, { $set: { violations: 3 } })
         .then((res) => res)
         .catch((err) => logger.error(err));
 
