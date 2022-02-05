@@ -82,6 +82,7 @@ const resolvers = {
     },
 
     UpdateProduct: async (parent, { inputProduct }, context, info) => {
+      // burası full fixlenecek
       if (!inputProduct?._id)
         return {
           success: false,
@@ -92,7 +93,7 @@ const resolvers = {
 
       const result = await db
         .collection(COLLECTION.PRODUCT)
-        .updateOne({ _id: 'Central Perk Cafe' }, { $set: { violations: 3 } })
+        .updateOne({ _id: inputProduct?._id }, { $set: { violations: 3 } })
         .then((res) => res)
         .catch((err) => logger.error(err));
 
