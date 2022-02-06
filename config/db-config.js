@@ -4,6 +4,7 @@ const DB_CONFIG = {
     PRODUCT: 'PRODUCT',
     COUPONS: 'COUPONS',
     ORDERS: 'ORDERS',
+    CATEGORIES: 'CATEGORIES',
   },
 };
 

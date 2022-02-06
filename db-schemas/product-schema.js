@@ -2,7 +2,7 @@ const productSchema = {
   validator: {
     $jsonSchema: {
       bsonType: 'object',
-      required: ['title', 'price', 'stock', 'images', 'cargoDetail', 'categoryCode'],
+      required: ['title', 'price', 'stock', 'images', 'cargoDetail', 'categoryName'],
       properties: {
         title: {
           bsonType: 'string',
@@ -24,9 +24,8 @@ const productSchema = {
           bsonType: 'bool',
           description: 'must be an bool',
         },
-        categoryCode: {
+        categoryName: {
           bsonType: 'string',
-          enum: ['A', 'B', 'C'],
           description: 'must be one of the values listed and is required',
         },
         currency: {

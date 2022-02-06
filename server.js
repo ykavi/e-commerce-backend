@@ -12,14 +12,21 @@ const typeDefs = gql`
 
   type Query {
     Products(ids: [String]): [Products]
+    Categories(ids: [String]): [Categories]
   }
 
   type Mutation {
     AddProduct(inputProduct: ProductInput): Products
     UpdateProduct(_id: String!, inputProduct: ProductInput): Products
     DeleteProduct(_id: String!, inputProduct: ProductInput): Products
-  }
 
+    AddCategory(inputCategory: CategoryInput): Categories
+    UpdateCategory(_id: String!, inputCategory: CategoryInput): Categories
+    DeleteCategory(categoryName: String!, inputCategory: CategoryInput): Categories
+  }
+  input CategoryInput {
+    name: String
+  }
   input ProductInput {
     title: String
     price: Int!
@@ -28,7 +35,7 @@ const typeDefs = gql`
     images: [String]
     stock: Int
     description: String
-    categoryCode: String
+    categoryName: String
     currency: String
     values: [String]
     cargoDetail: CargoDetailInput
@@ -36,6 +43,11 @@ const typeDefs = gql`
   input CargoDetailInput {
     free: Boolean
     price: Int
+  }
+
+  type Categories {
+    _id: String
+    name: String
   }
 
   type Products {
@@ -47,7 +59,7 @@ const typeDefs = gql`
     images: [String]
     stock: Int
     description: String
-    categoryCode: String
+    categoryName: String
     currency: String
     values: [String]
     cargoDetail: CargoDetail
@@ -67,6 +79,15 @@ const resolvers = {
         .collection(COLLECTION.PRODUCT)
         .find(args.ids.length > 0 && { _id: { $in: [...args.ids.map((id) => ObjectId(id))] } })
         .limit(50)
+        .toArray()
+        .then((res) => res)
+        .catch((err) => logger.error(err));
+    },
+
+    Categories: async (parent, args, context, info) => {
+      return await db
+        .collection(COLLECTION.CATEGORIES)
+        .find(args.ids.length > 0 && { _id: { $in: [...args.ids.map((id) => ObjectId(id))] } })
         .toArray()
         .then((res) => res)
         .catch((err) => logger.error(err));
@@ -93,6 +114,21 @@ const resolvers = {
       );
     },
 
+    AddCategory: async (parent, { inputCategory }, context, info) => {
+      const result = await db
+        .collection(COLLECTION.CATEGORIES)
+        .insertOne(inputCategory)
+        .then((res) => res)
+        .catch((err) => logger.error(err));
+
+      return (
+        result?.insertedId && {
+          ...inputCategory,
+          _id: result?.insertedId,
+        }
+      );
+    },
+
     UpdateProduct: async (parent, args, context, info) => {
       if (!args?._id) logger.error('UpdateProduct: !args?._id');
 
@@ -102,6 +138,18 @@ const resolvers = {
       const result = await db
         .collection(COLLECTION.PRODUCT)
         .findOneAndUpdate({ _id: ObjectId(args._id) }, { $set: { ...mappedProduct, updatedAt: new Date() } })
+        .then((res) => res)
+        .catch((err) => logger.error(err));
+
+      return result?.value && result?.value;
+    },
+
+    UpdateCategory: async (parent, args, context, info) => {
+      if (!args?._id) logger.error('UpdateCategory: !args?._id');
+
+      const result = await db
+        .collection(COLLECTION.CATEGORIES)
+        .findOneAndUpdate({ _id: ObjectId(args._id) }, { $set: { ...args?.inputCategory } })
         .then((res) => res)
         .catch((err) => logger.error(err));
 
@@ -118,6 +166,25 @@ const resolvers = {
         .catch((err) => logger.error(err));
 
       return result?.value && result?.value;
+    },
+
+    DeleteCategory: async (parent, args, context, info) => {
+      if (!args?.categoryName) logger.error('DeleteCategory: !args?._id');
+
+      const useProductCheck = await db
+        .collection(COLLECTION.PRODUCT)
+        .findOne({ categoryName: args?.categoryName })
+        .then((res) => res)
+        .catch((err) => logger.error(err));
+
+      if (!useProductCheck) {
+        const result = await db
+          .collection(COLLECTION.CATEGORIES)
+          .findOneAndDelete({ name: args?.categoryName })
+          .then((res) => res)
+          .catch((err) => logger.error(err));
+        return result?.value && result?.value;
+      }
     },
   },
 };

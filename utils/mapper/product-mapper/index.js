@@ -10,7 +10,7 @@ const productMapper = (product) => {
       images: product?.images,
       stock: product?.stock,
       description: product?.description || '',
-      categoryCode: product?.categoryCode,
+      categoryName: product?.categoryName || 'other',
       currency: product?.currency || 'TL',
       values: product?.values || [],
       cargoDetail: {
