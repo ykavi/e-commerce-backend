@@ -4,7 +4,7 @@ const productMapper = (product) => {
   try {
     return {
       title: product?.title,
-      price: product?.price,
+      price: product?.price || -1,
       discountedPrice: product?.discountedPrice || 0,
       hasDiscount: product?.hasDiscount || false,
       images: product?.images,

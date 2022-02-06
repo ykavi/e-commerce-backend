@@ -15,6 +15,7 @@ const typeDefs = gql`
   type Mutation {
     AddProduct(inputProduct: ProductInput): Products
     UpdateProduct(_id: String!, inputProduct: ProductInput): Products
+    DeleteProduct(_id: String!, inputProduct: ProductInput): Products
   }
 
   input ProductInput {
@@ -67,6 +68,7 @@ const resolvers = {
         .catch((err) => logger.error(err));
     },
   },
+
   Mutation: {
     AddProduct: async (parent, { inputProduct }, context, info) => {
       const mappedProduct = productMapper(inputProduct);
@@ -81,23 +83,31 @@ const resolvers = {
       return result?.insertedId && { ...mappedProduct, _id: result?.insertedId };
     },
 
-    UpdateProduct: async (parent, { inputProduct }, context, info) => {
-      // burası full fixlenecek
-      if (!inputProduct?._id)
-        return {
-          success: false,
-          message: 'failed to cancel trip',
-        };
-      const mappedProduct = productMapper(inputProduct);
+    UpdateProduct: async (parent, args, context, info) => {
+      if (!args?._id) logger.error('UpdateProduct: !args?._id');
+
+      const mappedProduct = productMapper(args?.inputProduct);
       if (!mappedProduct) logger.error('mappedProduct error!');
 
       const result = await db
         .collection(COLLECTION.PRODUCT)
-        .updateOne({ _id: inputProduct?._id }, { $set: { violations: 3 } })
+        .findOneAndUpdate({ _id: ObjectId(args._id) }, { $set: mappedProduct })
         .then((res) => res)
         .catch((err) => logger.error(err));
 
-      return result?.insertedId && { ...mappedProduct, _id: result?.insertedId };
+      return result?.value && result?.value;
+    },
+
+    DeleteProduct: async (parent, args, context, info) => {
+      if (!args?._id) logger.error('DeleteProduct: !args?._id');
+
+      const result = await db
+        .collection(COLLECTION.PRODUCT)
+        .findOneAndDelete({ _id: ObjectId(args._id) })
+        .then((res) => res)
+        .catch((err) => logger.error(err));
+
+      return result?.value && result?.value;
     },
   },
 };
