@@ -115,18 +115,28 @@ const resolvers = {
     },
 
     AddCategory: async (parent, { inputCategory }, context, info) => {
-      const result = await db
+      const upperCase = inputCategory?.name.toLocaleUpperCase('tr-TR');
+
+      const checkDublicate = await db
         .collection(COLLECTION.CATEGORIES)
-        .insertOne(inputCategory)
+        .findOne({ name: upperCase })
         .then((res) => res)
         .catch((err) => logger.error(err));
 
-      return (
-        result?.insertedId && {
-          ...inputCategory,
-          _id: result?.insertedId,
-        }
-      );
+      if (!checkDublicate) {
+        const result = await db
+          .collection(COLLECTION.CATEGORIES)
+          .insertOne({ name: upperCase })
+          .then((res) => res)
+          .catch((err) => logger.error(err));
+
+        return (
+          result?.insertedId && {
+            ...inputCategory,
+            _id: result?.insertedId,
+          }
+        );
+      }
     },
 
     UpdateProduct: async (parent, args, context, info) => {
