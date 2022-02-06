@@ -8,6 +8,8 @@ const { productSchema } = require('./db-schemas/product-schema');
 const { productMapper } = require('./utils/mapper');
 
 const typeDefs = gql`
+  scalar Date
+
   type Query {
     Products(ids: [String]): [Products]
   }
@@ -49,6 +51,8 @@ const typeDefs = gql`
     currency: String
     values: [String]
     cargoDetail: CargoDetail
+    createdAt: Date
+    updatedAt: Date
   }
   type CargoDetail {
     free: Boolean
@@ -76,11 +80,17 @@ const resolvers = {
 
       const result = await db
         .collection(COLLECTION.PRODUCT)
-        .insertOne(mappedProduct)
+        .insertOne({ ...mappedProduct, createdAt: new Date() })
         .then((res) => res)
         .catch((err) => logger.error(err));
 
-      return result?.insertedId && { ...mappedProduct, _id: result?.insertedId };
+      return (
+        result?.insertedId && {
+          ...mappedProduct,
+          _id: result?.insertedId,
+          createdAt: new Date(),
+        }
+      );
     },
 
     UpdateProduct: async (parent, args, context, info) => {
@@ -91,7 +101,7 @@ const resolvers = {
 
       const result = await db
         .collection(COLLECTION.PRODUCT)
-        .findOneAndUpdate({ _id: ObjectId(args._id) }, { $set: mappedProduct })
+        .findOneAndUpdate({ _id: ObjectId(args._id) }, { $set: { ...mappedProduct, updatedAt: new Date() } })
         .then((res) => res)
         .catch((err) => logger.error(err));
 
