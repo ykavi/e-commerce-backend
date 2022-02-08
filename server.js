@@ -14,6 +14,8 @@ const typeDefs = gql`
   type Query {
     Products(ids: [String]): [Products]
     Categories(ids: [String]): [Categories]
+    Orders(ids: [String]): [Orders]
+    Coupons(ids: [String]): [Coupons]
   }
 
   type Mutation {
@@ -26,6 +28,11 @@ const typeDefs = gql`
     DeleteCategory(categoryName: String!, inputCategory: CategoryInput): Categories
 
     AddOrder(inputOrder: OrderInput): Orders
+    UpdateOrder(_id: String!, inputOrder: OrderInput): Orders
+
+    AddCoupon(inputCoupon: CouponInput): Coupons
+    UpdateCoupon(_id: String!, inputCoupon: CouponInput): Coupons
+    DeleteCoupon(_id: String!): Coupons
   }
 
   input OrderInput {
@@ -68,6 +75,13 @@ const typeDefs = gql`
   input CargoDetailInput {
     free: Boolean
     price: Int
+  }
+  input CouponInput {
+    code: String!
+    codeLimit: Int!
+    amount: Int!
+    shoppingTotal: Int
+    expireDate: Date
   }
 
   type Categories {
@@ -119,6 +133,15 @@ const typeDefs = gql`
     district: String
     note: String
   }
+
+  type Coupons {
+    _id: String
+    code: String!
+    codeLimit: Int
+    amount: Int
+    shoppingTotal: Int
+    expireDate: Date
+  }
 `;
 
 const resolvers = {
@@ -136,6 +159,24 @@ const resolvers = {
     Categories: async (parent, args, context, info) => {
       return await db
         .collection(COLLECTION.CATEGORIES)
+        .find(args.ids.length > 0 && { _id: { $in: [...args.ids.map((id) => ObjectId(id))] } })
+        .toArray()
+        .then((res) => res)
+        .catch((err) => logger.error(err));
+    },
+
+    Orders: async (parent, args, context, info) => {
+      return await db
+        .collection(COLLECTION.ORDERS)
+        .find(args.ids.length > 0 && { _id: { $in: [...args.ids.map((id) => ObjectId(id))] } })
+        .toArray()
+        .then((res) => res)
+        .catch((err) => logger.error(err));
+    },
+
+    Coupons: async (parent, args, context, info) => {
+      return await db
+        .collection(COLLECTION.COUPONS)
         .find(args.ids.length > 0 && { _id: { $in: [...args.ids.map((id) => ObjectId(id))] } })
         .toArray()
         .then((res) => res)
@@ -205,6 +246,31 @@ const resolvers = {
       );
     },
 
+    AddCoupon: async (parent, { inputCoupon }, context, info) => {
+      const upperCodeName = upperCase(inputCoupon?.code);
+
+      const checkDublicate = await db
+        .collection(COLLECTION.COUPONS)
+        .findOne({ code: upperCodeName })
+        .then((res) => res)
+        .catch((err) => logger.error(err));
+
+      if (!checkDublicate) {
+        const result = await db
+          .collection(COLLECTION.COUPONS)
+          .insertOne({ ...inputCoupon, code: upperCodeName, createdAt: new Date() })
+          .then((res) => res)
+          .catch((err) => logger.error(err));
+
+        return (
+          result?.insertedId && {
+            ...inputCoupon,
+            _id: result?.insertedId,
+          }
+        );
+      }
+    },
+
     UpdateProduct: async (parent, args, context, info) => {
       if (!args?._id) logger.error('UpdateProduct: !args?._id');
 
@@ -234,6 +300,32 @@ const resolvers = {
       return result?.value && result?.value;
     },
 
+    UpdateOrder: async (parent, args, context, info) => {
+      if (!args?._id) logger.error('UpdateOrder: !args?._id');
+      if (!args?.inputOrder?.productIds.length) return false;
+
+      const result = await db
+        .collection(COLLECTION.ORDERS)
+        .findOneAndUpdate({ _id: ObjectId(args._id) }, { $set: { ...args?.inputOrder, updatedAt: new Date() } })
+        .then((res) => res)
+        .catch((err) => logger.error(err));
+
+      return result?.value && result?.value;
+    },
+
+    UpdateCoupon: async (parent, args, context, info) => {
+      if (!args?._id) logger.error('UpdateOrder: !args?._id');
+      const upperCodeName = upperCase(args?.inputCoupon?.code);
+
+      const result = await db
+        .collection(COLLECTION.COUPONS)
+        .findOneAndUpdate({ _id: ObjectId(args._id) }, { $set: { ...args?.inputCoupon, code: upperCodeName, updatedAt: new Date() } })
+        .then((res) => res)
+        .catch((err) => logger.error(err));
+
+      return result?.value && result?.value;
+    },
+
     DeleteProduct: async (parent, args, context, info) => {
       if (!args?._id) logger.error('DeleteProduct: !args?._id');
 
@@ -247,7 +339,7 @@ const resolvers = {
     },
 
     DeleteCategory: async (parent, args, context, info) => {
-      if (!args?.categoryName) logger.error('DeleteCategory: !args?._id');
+      if (!args?.categoryName) logger.error('DeleteCategory: !args?.categoryName');
 
       const useProductCheck = await db
         .collection(COLLECTION.PRODUCT)
@@ -263,6 +355,17 @@ const resolvers = {
           .catch((err) => logger.error(err));
         return result?.value && result?.value;
       }
+    },
+
+    DeleteCoupon: async (parent, args, context, info) => {
+      if (!args?._id) logger.error('DeleteCoupon: !args?._id');
+
+      const result = await db
+        .collection(COLLECTION.COUPONS)
+        .findOneAndDelete({ _id: ObjectId(args._id) })
+        .then((res) => res)
+        .catch((err) => logger.error(err));
+      return result?.value && result?.value;
     },
   },
 };
