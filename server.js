@@ -6,6 +6,7 @@ const logger = require('./logger/api.logger');
 const { DB_NAME, COLLECTION } = require('./config/db-config');
 const { productSchema } = require('./db-schemas/product-schema');
 const { productMapper } = require('./utils/mapper');
+const { upperCase } = require('./utils/helper');
 
 const typeDefs = gql`
   scalar Date
@@ -49,7 +50,6 @@ const typeDefs = gql`
     _id: String
     name: String
   }
-
   type Products {
     _id: String!
     title: String
@@ -115,18 +115,18 @@ const resolvers = {
     },
 
     AddCategory: async (parent, { inputCategory }, context, info) => {
-      const upperCase = inputCategory?.name.toLocaleUpperCase('tr-TR');
+      const upperText = upperCase(inputCategory?.name);
 
       const checkDublicate = await db
         .collection(COLLECTION.CATEGORIES)
-        .findOne({ name: upperCase })
+        .findOne({ name: upperText })
         .then((res) => res)
         .catch((err) => logger.error(err));
 
       if (!checkDublicate) {
         const result = await db
           .collection(COLLECTION.CATEGORIES)
-          .insertOne({ name: upperCase })
+          .insertOne({ name: upperText })
           .then((res) => res)
           .catch((err) => logger.error(err));
 
@@ -157,9 +157,11 @@ const resolvers = {
     UpdateCategory: async (parent, args, context, info) => {
       if (!args?._id) logger.error('UpdateCategory: !args?._id');
 
+      const upperText = upperCase(args?.inputCategory?.name);
+
       const result = await db
         .collection(COLLECTION.CATEGORIES)
-        .findOneAndUpdate({ _id: ObjectId(args._id) }, { $set: { ...args?.inputCategory } })
+        .findOneAndUpdate({ _id: ObjectId(args._id) }, { $set: { ...args?.inputCategory, name: upperText } })
         .then((res) => res)
         .catch((err) => logger.error(err));
 
