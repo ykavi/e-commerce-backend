@@ -24,6 +24,30 @@ const typeDefs = gql`
     AddCategory(inputCategory: CategoryInput): Categories
     UpdateCategory(_id: String!, inputCategory: CategoryInput): Categories
     DeleteCategory(categoryName: String!, inputCategory: CategoryInput): Categories
+
+    AddOrder(inputOrder: OrderInput): Orders
+  }
+
+  input OrderInput {
+    productIds: [String]!
+    payment: Int!
+    couponId: String
+    receiver: ReceiverInput
+    status: OrderStatusInput
+  }
+  input ReceiverInput {
+    name: String
+    surName: String
+    address: String
+    phone: String
+    mail: String
+    country: String
+    city: String
+    district: String
+    note: String
+  }
+  input OrderStatusInput {
+    cargo: Boolean
   }
   input CategoryInput {
     name: String
@@ -69,6 +93,31 @@ const typeDefs = gql`
   type CargoDetail {
     free: Boolean
     price: Int
+  }
+
+  type Orders {
+    _id: String
+    productIds: [String]
+    payment: Int
+    couponId: String
+    receiver: Receiver
+    status: OrderStatus
+    createdAt: Date
+    updatedAt: Date
+  }
+  type OrderStatus {
+    cargo: Boolean
+  }
+  type Receiver {
+    name: String
+    surName: String
+    address: String
+    phone: String
+    mail: String
+    country: String
+    city: String
+    district: String
+    note: String
   }
 `;
 
@@ -137,6 +186,23 @@ const resolvers = {
           }
         );
       }
+    },
+
+    AddOrder: async (parent, { inputOrder }, context, info) => {
+      if (!inputOrder?.productIds?.length) return false;
+
+      const result = await db
+        .collection(COLLECTION.ORDERS)
+        .insertOne({ ...inputOrder, createdAt: new Date() })
+        .then((res) => res)
+        .catch((err) => logger.error(err));
+
+      return (
+        result?.insertedId && {
+          ...inputOrder,
+          _id: result?.insertedId,
+        }
+      );
     },
 
     UpdateProduct: async (parent, args, context, info) => {
