@@ -1,0 +1,22 @@
+scalar Date
+
+type Products {
+    _id: String!
+    title: String
+    price: Int!
+    discountedPrice: Int
+    hasDiscount: Boolean!
+    images: [String]
+    stock: Int
+    description: String
+    categoryName: String
+    currency: String
+    values: [String]
+    cargoDetail: CargoDetail
+    createdAt: Date
+    updatedAt: Date
+}
+type CargoDetail {
+    free: Boolean
+    price: Int
+}

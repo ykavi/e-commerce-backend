@@ -1,0 +1,11 @@
+# import Product from './Product.graphql'
+# import Order from './Order.graphql'
+# import Categories from './Categories.graphql'
+# import Coupon from './Coupon.graphql'
+
+type Query {
+    Products(ids: [String]): [Products]
+    Categories(ids: [String]): [Categories]
+    Orders(ids: [String]): [Orders]
+    Coupons(ids: [String]): [Coupons]
+}

@@ -1,0 +1,10 @@
+scalar Date
+
+type Coupons {
+    _id: String
+    code: String!
+    codeLimit: Int
+    amount: Int
+    shoppingTotal: Int
+    expireDate: Date
+}

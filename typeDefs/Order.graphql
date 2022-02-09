@@ -1,0 +1,26 @@
+scalar Date
+
+type Receiver {
+    name: String
+    surName: String
+    address: String
+    phone: String
+    mail: String
+    country: String
+    city: String
+    district: String
+    note: String
+}
+type Orders {
+    _id: String
+    productIds: [String]
+    payment: Int
+    couponId: String
+    receiver: Receiver
+    status: OrderStatus
+    createdAt: Date
+    updatedAt: Date
+}
+type OrderStatus {
+    cargo: Boolean
+}
