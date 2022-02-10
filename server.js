@@ -7,23 +7,37 @@ const { DB_NAME, COLLECTION } = require('./config/db-config');
 const { productSchema } = require('./db-schemas/product-schema');
 const { productMapper } = require('./utils/mapper');
 const { upperCase } = require('./utils/helper');
+import typeDefs from './typeDefs';
+import resolvers from './resolvers';
 
-const typeDefs = gql``;
+const port = process.env.PORT || 3000;
+require('dotenv').config();
+
+let db;
 
 const server = new ApolloServer({
   typeDefs,
   resolvers,
-});
-const port = process.env.PORT || 3000;
+  context: async () => {
+    if (!db) {
+      try {
+        const dbClient = new MongoClient(process.env.MONGO_CONNECTION_STRING, {
+          useNewUrlParser: true,
+          useUnifiedTopology: true,
+        });
 
-require('dotenv').config();
-let db;
+        if (!dbClient.isConnected()) await dbClient.connect();
+        db = dbClient.db(DB_NAME);
+      } catch (err) {
+        logger.error(`MongoDB connected fail ${err}`);
+      }
+    }
 
-MongoClient.connect(process.env.MONGO_CONNECTION_STRING, (err, database) => {
-  if (err) throw err;
-  db = database.db(DB_NAME); // DB connection apollo server context parametresinde yapılacak.
-  server.listen(port).then(({ url }) => logger.info(`Server running at ${url} `));
+    return { db };
+  },
 });
+
+server.listen(port).then(({ url }) => logger.info(`Server running at ${url} `));
 
 /*
 app.get('/products', (req, res) => {
