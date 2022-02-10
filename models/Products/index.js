@@ -1,12 +1,13 @@
+import { DB_CONFIG } from '../../config/db-config';
 class Products {
   static async get(parent, args, context, info) {
-    return await db
-      .collection(COLLECTION.PRODUCT)
+    return await context.db
+      .collection(DB_CONFIG.COLLECTION.PRODUCT)
       .find(args.ids.length > 0 && { _id: { $in: [...args.ids.map((id) => ObjectId(id))] } })
       .limit(50)
       .toArray()
       .then((res) => res)
-      .catch((err) => logger.error(`Products.get() error=${error}`));
+      .catch((err) => console.error(`Products.get() error=${error}`));
   }
 
   static async create(parent, { inputProduct }, context, info) {

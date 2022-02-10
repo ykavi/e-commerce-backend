@@ -1,4 +1,4 @@
-const DB_CONFIG = {
+export const DB_CONFIG = {
   DB_NAME: 'TASK',
   COLLECTION: {
     PRODUCT: 'PRODUCT',
@@ -7,5 +7,3 @@ const DB_CONFIG = {
     CATEGORIES: 'CATEGORIES',
   },
 };
-
-module.exports = DB_CONFIG;

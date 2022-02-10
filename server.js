@@ -1,18 +1,13 @@
-const express = require('express');
-const { MongoClient, ObjectId } = require('mongodb');
-const { ApolloServer, gql } = require('apollo-server');
-
-const logger = require('./logger/api.logger');
-const { DB_NAME, COLLECTION } = require('./config/db-config');
-const { productSchema } = require('./db-schemas/product-schema');
-const { productMapper } = require('./utils/mapper');
-const { upperCase } = require('./utils/helper');
+import express from 'express';
+import { MongoClient, ObjectId } from 'mongodb';
+import { ApolloServer, gql } from 'apollo-server';
+import { DB_CONFIG } from './config/db-config';
 import typeDefs from './typeDefs';
 import resolvers from './resolvers';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const port = process.env.PORT || 3000;
-require('dotenv').config();
-
 let db;
 
 const server = new ApolloServer({
@@ -27,9 +22,9 @@ const server = new ApolloServer({
         });
 
         if (!dbClient.isConnected()) await dbClient.connect();
-        db = dbClient.db(DB_NAME);
+        db = dbClient.db(DB_CONFIG.DB_NAME);
       } catch (err) {
-        logger.error(`MongoDB connected fail ${err}`);
+        console.error(`MongoDB connected fail ${err}`);
       }
     }
 
@@ -37,7 +32,7 @@ const server = new ApolloServer({
   },
 });
 
-server.listen(port).then(({ url }) => logger.info(`Server running at ${url} `));
+server.listen(port).then(({ url }) => console.log(`Server running at ${url} `));
 
 /*
 app.get('/products', (req, res) => {
