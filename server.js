@@ -1,5 +1,5 @@
 import express from 'express';
-import { MongoClient, ObjectId } from 'mongodb';
+import { MongoClient } from 'mongodb';
 import { ApolloServer, gql } from 'apollo-server';
 import { DB_CONFIG } from './config/db-config';
 import typeDefs from './typeDefs';
@@ -16,12 +16,9 @@ const server = new ApolloServer({
   context: async () => {
     if (!db) {
       try {
-        const dbClient = new MongoClient(process.env.MONGO_CONNECTION_STRING, {
-          useNewUrlParser: true,
-          useUnifiedTopology: true,
-        });
+        const dbClient = new MongoClient(process.env.MONGO_CONNECTION_STRING);
 
-        if (!dbClient.isConnected()) await dbClient.connect();
+        await dbClient.connect();
         db = dbClient.db(DB_CONFIG.DB_NAME);
       } catch (err) {
         console.error(`MongoDB connected fail ${err}`);

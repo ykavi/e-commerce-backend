@@ -1,4 +1,7 @@
+import { ObjectId } from 'mongodb';
 import { DB_CONFIG } from '../../config/db-config';
+import { productMapper } from '../../utils/mapper';
+
 class Products {
   static async get(parent, args, context, info) {
     return await context.db
@@ -12,13 +15,13 @@ class Products {
 
   static async create(parent, { inputProduct }, context, info) {
     const mappedProduct = productMapper(inputProduct);
-    if (!mappedProduct) logger.error('mappedProduct error!');
+    if (!mappedProduct) console.error('mappedProduct error!');
 
     const result = await db
-      .collection(COLLECTION.PRODUCT)
+      .collection(DB_CONFIG.COLLECTION.PRODUCT)
       .insertOne({ ...mappedProduct, createdAt: new Date() })
       .then((res) => res)
-      .catch((err) => logger.error(err));
+      .catch((err) => console.error(err));
 
     return (
       result?.insertedId && {

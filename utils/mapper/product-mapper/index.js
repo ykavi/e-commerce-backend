@@ -1,6 +1,4 @@
-const logger = require('../../../logger/api.logger');
-
-const productMapper = (product) => {
+export const productMapper = (product) => {
   try {
     return {
       title: product?.title,
@@ -19,10 +17,8 @@ const productMapper = (product) => {
       },
     };
   } catch (e) {
-    logger.error(`productMapper error:${e}`);
+    console.error(`productMapper error:${e}`);
   }
 
   return false;
 };
-
-module.exports = { productMapper };

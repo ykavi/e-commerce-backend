@@ -1,3 +1,3 @@
-const { productMapper } = require('./product-mapper');
+import { productMapper } from './product-mapper';
 
-module.exports = { productMapper };
+export { productMapper };
