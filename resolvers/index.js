@@ -5,53 +5,53 @@ const resolvers = {
     Products: async (...props) => {
       return await Products.get(...props);
     },
-    Categories: async (parent, args, context, info) => {
-      return await Categories.get(parent, args, context, info);
+    Categories: async (...props) => {
+      return await Categories.get(...props);
     },
-    Orders: async (parent, args, context, info) => {
-      return await Orders.get(parent, args, context, info);
+    Orders: async (...props) => {
+      return await Orders.get(...props);
     },
-    Coupons: async (parent, args, context, info) => {
-      return await Coupons.get(parent, args, context, info);
+    Coupons: async (...props) => {
+      return await Coupons.get(...props);
     },
   },
 
   Mutation: {
-    AddProduct: async (parent, { inputProduct }, context, info) => {
-      return await Products.create(parent, { inputProduct }, context, info);
+    AddProduct: async (...props) => {
+      return await Products.create(...props);
     },
-    UpdateProduct: async (parent, args, context, info) => {
-      return await Products.update(parent, args, context, info);
+    UpdateProduct: async (...props) => {
+      return await Products.update(...props);
     },
-    DeleteProduct: async (parent, args, context, info) => {
-      return await Products.delete(parent, args, context, info);
-    },
-
-    AddCategory: async (parent, { inputCategory }, context, info) => {
-      return await Categories.create(parent, { inputCategory }, context, info);
-    },
-    UpdateCategory: async (parent, args, context, info) => {
-      return await Categories.update(parent, args, context, info);
-    },
-    DeleteCategory: async (parent, args, context, info) => {
-      return await Categories.update(parent, args, context, info);
+    DeleteProduct: async (...props) => {
+      return await Products.delete(...props);
     },
 
-    AddOrder: async (parent, { inputOrder }, context, info) => {
-      return await Orders.create(parent, { inputOrder }, context, info);
+    AddCategory: async (...props) => {
+      return await Categories.create(...props);
     },
-    UpdateOrder: async (parent, args, context, info) => {
-      return await Orders.update(parent, args, context, info);
+    UpdateCategory: async (...props) => {
+      return await Categories.update(...props);
+    },
+    DeleteCategory: async (...props) => {
+      return await Categories.update(...props);
     },
 
-    AddCoupon: async (parent, { inputCoupon }, context, info) => {
-      return await Coupons.create(parent, { inputCoupon }, context, info);
+    AddOrder: async (...props) => {
+      return await Orders.create(...props);
     },
-    UpdateCoupon: async (parent, args, context, info) => {
-      return await Coupons.update(parent, args, context, info);
+    UpdateOrder: async (...props) => {
+      return await Orders.update(...props);
     },
-    DeleteCoupon: async (parent, args, context, info) => {
-      return await Coupons.delete(parent, args, context, info);
+
+    AddCoupon: async (...props) => {
+      return await Coupons.create(...props);
+    },
+    UpdateCoupon: async (...props) => {
+      return await Coupons.update(...props);
+    },
+    DeleteCoupon: async (...props) => {
+      return await Coupons.delete(...props);
     },
   },
 };

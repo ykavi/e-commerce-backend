@@ -1,28 +1,32 @@
+import { ObjectId } from 'mongodb';
+import { DB_CONFIG } from '../../config/db-config';
+import { upperCase } from '../../utils/helper';
+
 class Coupons {
-  static async get(parent, args, context, info) {
-    return await db
-      .collection(COLLECTION.COUPONS)
-      .find(args.ids.length > 0 && { _id: { $in: [...args.ids.map((id) => ObjectId(id))] } })
+  static async get(_, { ids }, { dataSources }) {
+    return await dataSources.db
+      .collection(DB_CONFIG.COLLECTION.COUPONS)
+      .find(ids?.length > 0 && { _id: { $in: [...ids.map((id) => ObjectId(id))] } })
       .toArray()
       .then((res) => res)
-      .catch((err) => logger.error(err));
+      .catch((err) => console.error(err));
   }
 
-  static async create(parent, { inputCoupon }, context, info) {
+  static async create(_, { inputCoupon }, { dataSources }) {
     const upperCodeName = upperCase(inputCoupon?.code);
 
-    const checkDublicate = await db
-      .collection(COLLECTION.COUPONS)
+    const checkDublicate = await dataSources.db
+      .collection(DB_CONFIG.COLLECTION.COUPONS)
       .findOne({ code: upperCodeName })
       .then((res) => res)
-      .catch((err) => logger.error(err));
+      .catch((err) => console.error(err));
 
     if (!checkDublicate) {
-      const result = await db
-        .collection(COLLECTION.COUPONS)
+      const result = await dataSources.db
+        .collection(DB_CONFIG.COLLECTION.COUPONS)
         .insertOne({ ...inputCoupon, code: upperCodeName, createdAt: new Date() })
         .then((res) => res)
-        .catch((err) => logger.error(err));
+        .catch((err) => console.error(err));
 
       return (
         result?.insertedId && {
@@ -33,27 +37,27 @@ class Coupons {
     }
   }
 
-  static async update(parent, args, context, info) {
-    if (!args?._id) logger.error('UpdateOrder: !args?._id');
-    const upperCodeName = upperCase(args?.inputCoupon?.code);
+  static async update(_, { _id, inputCoupon }, { dataSources }) {
+    if (!_id) console.error('UpdateOrder: !_id');
+    const upperCodeName = upperCase(inputCoupon?.code);
 
-    const result = await db
-      .collection(COLLECTION.COUPONS)
-      .findOneAndUpdate({ _id: ObjectId(args._id) }, { $set: { ...args?.inputCoupon, code: upperCodeName, updatedAt: new Date() } })
+    const result = await dataSources.db
+      .collection(DB_CONFIG.COLLECTION.COUPONS)
+      .findOneAndUpdate({ _id: ObjectId(_id) }, { $set: { ...inputCoupon, code: upperCodeName, updatedAt: new Date() } })
       .then((res) => res)
-      .catch((err) => logger.error(err));
+      .catch((err) => console.error(err));
 
     return result?.value && result?.value;
   }
 
-  static async delete(parent, args, context, info) {
-    if (!args?._id) logger.error('DeleteCoupon: !args?._id');
+  static async delete(_, { _id }, { dataSources }) {
+    if (!_id) console.error('DeleteCoupon: !_id');
 
-    const result = await db
-      .collection(COLLECTION.COUPONS)
-      .findOneAndDelete({ _id: ObjectId(args._id) })
+    const result = await dataSources.db
+      .collection(DB_CONFIG.COLLECTION.COUPONS)
+      .findOneAndDelete({ _id: ObjectId(_id) })
       .then((res) => res)
-      .catch((err) => logger.error(err));
+      .catch((err) => console.error(err));
     return result?.value && result?.value;
   }
 }

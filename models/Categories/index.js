@@ -1,28 +1,32 @@
+import { ObjectId } from 'mongodb';
+import { DB_CONFIG } from '../../config/db-config';
+import { upperCase } from '../../utils/helper';
+
 class Categories {
-  static async get(parent, args, context, info) {
-    return await db
-      .collection(COLLECTION.CATEGORIES)
-      .find(args.ids.length > 0 && { _id: { $in: [...args.ids.map((id) => ObjectId(id))] } })
+  static async get(_, { ids }, { dataSources }) {
+    return await dataSources.db
+      .collection(DB_CONFIG.COLLECTION.CATEGORIES)
+      .find(ids?.length > 0 && { _id: { $in: [...ids.map((id) => ObjectId(id))] } })
       .toArray()
       .then((res) => res)
-      .catch((err) => logger.error(err));
+      .catch((err) => console.error(err));
   }
 
-  static async create(parent, { inputCategory }, context, info) {
+  static async create(_, { inputCategory }, { dataSources }) {
     const upperText = upperCase(inputCategory?.name);
 
-    const checkDublicate = await db
-      .collection(COLLECTION.CATEGORIES)
+    const checkDublicate = await dataSources.db
+      .collection(DB_CONFIG.COLLECTION.CATEGORIES)
       .findOne({ name: upperText })
       .then((res) => res)
-      .catch((err) => logger.error(err));
+      .catch((err) => console.error(err));
 
     if (!checkDublicate) {
-      const result = await db
-        .collection(COLLECTION.CATEGORIES)
+      const result = await dataSources.db
+        .collection(DB_CONFIG.COLLECTION.CATEGORIES)
         .insertOne({ name: upperText })
         .then((res) => res)
-        .catch((err) => logger.error(err));
+        .catch((err) => console.error(err));
 
       return (
         result?.insertedId && {
@@ -33,35 +37,35 @@ class Categories {
     }
   }
 
-  static async update(parent, args, context, info) {
-    if (!args?._id) logger.error('UpdateCategory: !args?._id');
+  static async update(_, { _id, inputCategory }, { dataSources }) {
+    if (!_id) console.error('UpdateCategory: !_id');
 
-    const upperText = upperCase(args?.inputCategory?.name);
+    const upperText = upperCase(inputCategory?.name);
 
-    const result = await db
-      .collection(COLLECTION.CATEGORIES)
-      .findOneAndUpdate({ _id: ObjectId(args._id) }, { $set: { ...args?.inputCategory, name: upperText } })
+    const result = await dataSources.db
+      .collection(DB_CONFIG.COLLECTION.CATEGORIES)
+      .findOneAndUpdate({ _id: ObjectId(_id) }, { $set: { inputCategory, name: upperText } })
       .then((res) => res)
-      .catch((err) => logger.error(err));
+      .catch((err) => console.error(err));
 
     return result?.value && result?.value;
   }
 
-  static async delete(parent, args, context, info) {
-    if (!args?.categoryName) logger.error('DeleteCategory: !args?.categoryName');
+  static async delete(_, { categoryName }, { dataSources }) {
+    if (!categoryName) console.error('DeleteCategory: !categoryName');
 
-    const useProductCheck = await db
-      .collection(COLLECTION.PRODUCT)
-      .findOne({ categoryName: args?.categoryName })
+    const useProductCheck = await dataSources.db
+      .collection(DB_CONFIG.COLLECTION.PRODUCT)
+      .findOne({ categoryName: categoryName })
       .then((res) => res)
-      .catch((err) => logger.error(err));
+      .catch((err) => console.error(err));
 
     if (!useProductCheck) {
-      const result = await db
-        .collection(COLLECTION.CATEGORIES)
-        .findOneAndDelete({ name: args?.categoryName })
+      const result = await dataSources.db
+        .collection(DB_CONFIG.COLLECTION.CATEGORIES)
+        .findOneAndDelete({ name: categoryName })
         .then((res) => res)
-        .catch((err) => logger.error(err));
+        .catch((err) => console.error(err));
       return result?.value && result?.value;
     }
   }

@@ -1,18 +1,22 @@
+import { ObjectId } from 'mongodb';
+import { DB_CONFIG } from '../../config/db-config';
+import { upperCase } from '../../utils/helper';
+
 class Orders {
-  static async get(parent, args, context, info) {
-    return await db
-      .collection(COLLECTION.ORDERS)
-      .find(args.ids.length > 0 && { _id: { $in: [...args.ids.map((id) => ObjectId(id))] } })
+  static async get(_, { ids }, { dataSources }) {
+    return await dataSources.db
+      .collection(DB_CONFIG.COLLECTION.ORDERS)
+      .find(ids?.length > 0 && { _id: { $in: [...ids.map((id) => ObjectId(id))] } })
       .toArray()
       .then((res) => res)
       .catch((err) => console.error(err));
   }
 
-  static async create(parent, { inputOrder }, context, info) {
+  static async create(_, { inputOrder }, { dataSources }) {
     if (!inputOrder?.productIds?.length) return false;
 
-    const result = await db
-      .collection(COLLECTION.ORDERS)
+    const result = await dataSources.db
+      .collection(DB_CONFIG.COLLECTION.ORDERS)
       .insertOne({ ...inputOrder, createdAt: new Date() })
       .then((res) => res)
       .catch((err) => console.error(err));
@@ -25,13 +29,13 @@ class Orders {
     );
   }
 
-  static async update(parent, args, context, info) {
-    if (!args?._id) console.error('UpdateOrder: !args?._id');
-    if (!args?.inputOrder?.productIds.length) return false;
+  static async update(_, { _id, inputOrder }, { dataSources }) {
+    if (!_id) console.error('UpdateOrder: !_id');
+    if (!inputOrder?.productIds.length) return false;
 
-    const result = await db
-      .collection(COLLECTION.ORDERS)
-      .findOneAndUpdate({ _id: ObjectId(args._id) }, { $set: { ...args?.inputOrder, updatedAt: new Date() } })
+    const result = await dataSources.db
+      .collection(DB_CONFIG.COLLECTION.ORDERS)
+      .findOneAndUpdate({ _id: ObjectId(_id) }, { $set: { ...inputOrder, updatedAt: new Date() } })
       .then((res) => res)
       .catch((err) => console.error(err));
 

@@ -1,3 +1,1 @@
-const upperCase = (text) => text?.toLocaleUpperCase('tr-TR');
-
-module.exports = { upperCase };
+export const upperCase = (text) => text?.toLocaleUpperCase('tr-TR');
