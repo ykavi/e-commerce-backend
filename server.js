@@ -8,28 +8,25 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const port = process.env.PORT || 3000;
-let db;
 
-const server = new ApolloServer({
-  typeDefs,
-  resolvers,
-  context: async () => {
-    if (!db) {
-      try {
-        const dbClient = new MongoClient(process.env.MONGO_CONNECTION_STRING);
+MongoClient.connect(process.env.MONGO_CONNECTION_STRING, (err, database) => {
+  if (err) throw err;
 
-        await dbClient.connect();
-        db = dbClient.db(DB_CONFIG.DB_NAME);
-      } catch (err) {
-        console.error(`MongoDB connected fail ${err}`);
-      }
-    }
+ let db = database.db(DB_CONFIG.DB_NAME);
 
-    return { db };
-  },
+  const server = new ApolloServer({
+    typeDefs,
+    resolvers,
+    dataSources: () => {
+      return {
+        db: db
+      };
+    },
+  });
+
+  server.listen(port).then(({ url }) => console.log(`Server running at ${url} `));
 });
 
-server.listen(port).then(({ url }) => console.log(`Server running at ${url} `));
 
 /*
 app.get('/products', (req, res) => {

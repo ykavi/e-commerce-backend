@@ -3,21 +3,21 @@ import { DB_CONFIG } from '../../config/db-config';
 import { productMapper } from '../../utils/mapper';
 
 class Products {
-  static async get(parent, args, context, info) {
-    return await context.db
+  static async get(_, { ids },{ dataSources}) {
+    return await dataSources.db
       .collection(DB_CONFIG.COLLECTION.PRODUCT)
-      .find(args.ids.length > 0 && { _id: { $in: [...args.ids.map((id) => ObjectId(id))] } })
+      .find(ids.length > 0 && { _id: { $in: [ids.map((id) => ObjectId(id))] } })
       .limit(50)
       .toArray()
       .then((res) => res)
       .catch((err) => console.error(`Products.get() error=${error}`));
   }
 
-  static async create(parent, { inputProduct }, context, info) {
+  static async create(_, { inputProduct },{ dataSources}) {
     const mappedProduct = productMapper(inputProduct);
     if (!mappedProduct) console.error('mappedProduct error!');
 
-    const result = await db
+    const result = await dataSources.db
       .collection(DB_CONFIG.COLLECTION.PRODUCT)
       .insertOne({ ...mappedProduct, createdAt: new Date() })
       .then((res) => res)
@@ -32,23 +32,23 @@ class Products {
     );
   }
 
-  static async update(parent, args, context, info) {
-    if (!args?._id) logger.error('UpdateProduct: !args?._id');
+  static async update(_, { _id, inputProduct },{ dataSources}) {
+    if (!_id) logger.error('UpdateProduct: !_id');
 
-    const mappedProduct = productMapper(args?.inputProduct);
-    if (!mappedProduct) logger.error('mappedProduct error!');
+    const mappedProduct = productMapper(inputProduct);
+    if (!mappedProduct) console.error('mappedProduct error!');
 
     const result = await db
       .collection(COLLECTION.PRODUCT)
-      .findOneAndUpdate({ _id: ObjectId(args._id) }, { $set: { ...mappedProduct, updatedAt: new Date() } })
+      .findOneAndUpdate({ _id: ObjectId(_id) }, { $set: { ...mappedProduct, updatedAt: new Date() } })
       .then((res) => res)
-      .catch((err) => logger.error(err));
+      .catch((err) => console.error(err));
 
     return result?.value && result?.value;
   }
 
   static async delete(parent, args, context, info) {
-    if (!args?._id) logger.error('DeleteProduct: !args?._id');
+    if (!args?._id) console.error('DeleteProduct: !args?._id');
 
     const result = await db
       .collection(COLLECTION.PRODUCT)

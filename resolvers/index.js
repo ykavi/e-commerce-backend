@@ -2,8 +2,8 @@ import { Products, Coupons, Categories, Orders } from '../models';
 
 const resolvers = {
   Query: {
-    Products: async (parent, args, context, info) => {
-      return await Products.get(parent, args, context, info);
+    Products: async (...props) => {
+      return await Products.get(...props);
     },
     Categories: async (parent, args, context, info) => {
       return await Categories.get(parent, args, context, info);
