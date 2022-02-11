@@ -1,6 +1,5 @@
 import { ObjectId } from 'mongodb';
 import { DB_CONFIG } from '../../config/db-config';
-import { upperCase } from '../../utils/helper';
 
 class Orders {
   static async get(_, { ids }, { dataSources }) {

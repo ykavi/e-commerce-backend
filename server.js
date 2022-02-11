@@ -1,8 +1,8 @@
 import { MongoClient } from 'mongodb';
 import { ApolloServer } from 'apollo-server';
-import { DB_CONFIG } from './config/db-config';
-import typeDefs from './typeDefs';
-import resolvers from './resolvers';
+import { DB_CONFIG } from './src/config/db-config';
+import typeDefs from './src/typeDefs';
+import resolvers from './src/resolvers';
 import dotenv from 'dotenv';
 dotenv.config();
 
