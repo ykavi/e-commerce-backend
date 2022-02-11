@@ -14,6 +14,10 @@ MongoClient.connect(process.env.MONGO_CONNECTION_STRING, (err, database) => {
   const db = database.db(DB_CONFIG.DB_NAME);
 
   const server = new ApolloServer({
+    cors: {
+      origin: 'https://studio.apollographql.com',
+      credentials: true,
+    },
     typeDefs,
     resolvers,
     dataSources: () => {
